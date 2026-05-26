@@ -46,5 +46,20 @@ return [
          * Wether the webhook request signature should be verified or not.
          */
         'verify_signature' => env('WHATSAPP_WEBHOOK_SIGNATURE_VERIFY', false),
+
+        /**
+         * Additional middleware to apply to the webhook routes.
+         * You can specify different middleware for each route:
+         *
+         * 'middleware' => [
+         *     'subscribe' => ['throttle:60,1'],
+         *     'handle'    => ['throttle:60,1'],
+         * ]
+         *
+         * Or apply the same middleware to all webhook routes using a flat array:
+         *
+         * 'middleware' => ['throttle:60,1'],
+         */
+        'middleware' => [],
     ],
 ];

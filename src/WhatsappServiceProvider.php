@@ -48,13 +48,23 @@ class WhatsappServiceProvider extends ServiceProvider
                 'prefix' => Config::get('whatsapp.webhook.path'),
                 'as' => 'whatsapp.',
             ], function () {
-                Route::get('webhook', [WebhookController::class, 'subscribe'])->name('webhook.subscribe');
+                $extraMiddleware = Config::get('whatsapp.webhook.middleware', []);
+                $isKeyed = array_key_exists('subscribe', $extraMiddleware) || array_key_exists('handle', $extraMiddleware);
 
-                $handleRoute = Route::post('webhook', [WebhookController::class, 'handle'])->name('webhook');
+                $subscribeMiddleware = $isKeyed ? (array) ($extraMiddleware['subscribe'] ?? []) : (array) $extraMiddleware;
+                $handleMiddleware = $isKeyed ? (array) ($extraMiddleware['handle'] ?? []) : (array) $extraMiddleware;
 
                 if (Config::get('whatsapp.webhook.verify_signature')) {
-                    $handleRoute->middleware(VerifyWebhookSignature::class);
+                    $handleMiddleware[] = VerifyWebhookSignature::class;
                 }
+
+                Route::get('webhook', [WebhookController::class, 'subscribe'])
+                    ->middleware($subscribeMiddleware)
+                    ->name('webhook.subscribe');
+
+                Route::post('webhook', [WebhookController::class, 'handle'])
+                    ->middleware($handleMiddleware)
+                    ->name('webhook');
             });
         }
     }
