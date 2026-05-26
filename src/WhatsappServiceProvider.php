@@ -5,6 +5,8 @@ namespace MissaelAnda\Whatsapp;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use MissaelAnda\Whatsapp\Http\Controllers\WebhookController;
+use MissaelAnda\Whatsapp\Http\Middleware\VerifyWebhookSignature;
 
 class WhatsappServiceProvider extends ServiceProvider
 {
@@ -46,7 +48,13 @@ class WhatsappServiceProvider extends ServiceProvider
                 'prefix' => Config::get('whatsapp.webhook.path'),
                 'as' => 'whatsapp.',
             ], function () {
-                $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+                Route::get('webhook', [WebhookController::class, 'subscribe'])->name('webhook.subscribe');
+
+                $handleRoute = Route::post('webhook', [WebhookController::class, 'handle'])->name('webhook');
+
+                if (Config::get('whatsapp.webhook.verify_signature')) {
+                    $handleRoute->middleware(VerifyWebhookSignature::class);
+                }
             });
         }
     }
