@@ -58,11 +58,11 @@ class WhatsappServiceProvider extends ServiceProvider
                     $handleMiddleware[] = VerifyWebhookSignature::class;
                 }
 
-                Route::get('webhook', [WebhookController::class, 'subscribe'])
+                Route::get('', [WebhookController::class, 'subscribe'])
                     ->middleware($subscribeMiddleware)
                     ->name('webhook.subscribe');
 
-                Route::post('webhook', [WebhookController::class, 'handle'])
+                Route::post('', [WebhookController::class, 'handle'])
                     ->middleware($handleMiddleware)
                     ->name('webhook');
             });
